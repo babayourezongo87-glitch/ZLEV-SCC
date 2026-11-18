@@ -4,8 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZLEV-SCC | Zone de Lecture, d'Écoute et de Visionnage Simple et Compréhensible</title>
+    <title>ZLEV-SCC | Zone de Lecture, d'Ecoute et de Visionnage Simple et Compréhensible pour vos Cours</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PDF.js pour le rendu ultra-fiable des PDF sur mobile et desktop sans blocage d'iframe -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         body {
@@ -13,7 +15,7 @@
             background-color: #f1f5f9;
             overflow-x: hidden;
         }
-        /* Bandeau défilant fluide en entête */
+        /* Bandeau défilant en entête */
         @keyframes marquee {
             0% { transform: translateX(100%); }
             100% { transform: translateX(-100%); }
@@ -26,7 +28,7 @@
         .animate-marquee:hover {
             animation-play-state: paused;
         }
-        /* Arrière-plan thématique étudiants sur téléphones + couleurs nationales du Burkina Faso */
+        /* Arrière-plan thématique étudiants sur leurs téléphones + couleurs du Burkina Faso */
         .hero-bg {
             background-image: linear-gradient(135deg, rgba(239, 43, 45, 0.92) 0%, rgba(15, 23, 42, 0.88) 50%, rgba(0, 158, 73, 0.92) 100%),
                               url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80');
@@ -34,7 +36,7 @@
             background-position: center;
         }
         .page-wallpaper {
-            background-image: linear-gradient(to bottom, rgba(248, 250, 252, 0.93), rgba(241, 245, 249, 0.96)),
+            background-image: linear-gradient(to bottom, rgba(248, 250, 252, 0.92), rgba(241, 245, 249, 0.96)),
                               url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1600&q=80');
             background-size: cover;
             background-position: center;
@@ -43,7 +45,7 @@
         .bf-gradient-bar {
             background: linear-gradient(90deg, #EF2B2D 0%, #EF2B2D 48%, #FCD116 50%, #009E49 52%, #009E49 100%);
         }
-        /* Protection contre le partage externe des contenus */
+        /* Protection contre la copie et le partage externe */
         .protected-content {
             user-select: none;
             -webkit-user-select: none;
@@ -52,7 +54,7 @@
 </head>
 <body class="min-h-screen flex flex-col text-slate-800 page-wallpaper">
 
-    <!-- Bandeau supérieur défilant obligatoire -->
+    <!-- Bandeau défilant obligatoire -->
     <div class="bg-slate-950 text-[#FCD116] py-2 overflow-hidden border-b-2 border-[#EF2B2D] relative z-50 shadow-md">
         <div class="animate-marquee font-extrabold text-xs sm:text-sm tracking-wider uppercase">
             🇧🇫 Administrateur du site ZONGO ISMAEL, ETUDIANT À L'UNIVERSITÉ THOMAS SANKARA &nbsp;&nbsp;★&nbsp;&nbsp; Bienvenue sur ZLEV-SCC : Vos cours simples, compréhensibles et accessibles hors connexion ! &nbsp;&nbsp;★&nbsp;&nbsp; Administrateur du site ZONGO ISMAEL, ETUDIANT À L'UNIVERSITÉ THOMAS SANKARA 🇧🇫
@@ -66,7 +68,7 @@
     <header class="hero-bg text-white shadow-xl relative z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <!-- Logo et Titre du site -->
+                <!-- Logo et Titre complet du site -->
                 <div id="brand-home-btn" class="flex items-start sm:items-center gap-3.5 cursor-pointer group">
                     <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#FCD116] text-slate-950 flex flex-col items-center justify-center font-black shadow-lg shrink-0 border-2 border-white group-hover:scale-105 transition">
                         <span class="text-sm sm:text-base leading-none">ZLEV</span>
@@ -115,9 +117,14 @@
     <script>
         /**
          * ============================================================================
-         * ZLEV-SCC - ARCHITECTURE COMPLÈTE (LOCALSTORAGE + INDEXEDDB + VALIDATION)
+         * CONFIGURATION PDF.JS & CONSTANTES GLOBALES
          * ============================================================================
          */
+        if (window.pdfjsLib) {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+
         const ADMIN_SECRET_CODE = '12az@#-+';
         const ADMIN_EMAIL = 'admin@zlev-scc.bf';
 
@@ -128,7 +135,7 @@
                 icon: '📖',
                 color: 'border-[#EF2B2D]',
                 badgeBg: 'bg-red-50 text-[#EF2B2D]',
-                desc: 'Fiches synthétiques, points clés et résumés structurés pour réviser rapidement.'
+                desc: 'Fiches synthétiques, documents PDF et résumés structurés pour réviser rapidement.'
             },
             {
                 id: 'video',
@@ -199,7 +206,6 @@
             }
         ];
 
-        // Demandes d'inscription pré-remplies pour tester la validation immédiatement
         const SAMPLE_PENDING_USERS = [
             {
                 id: 'usr_demo_1',
@@ -217,7 +223,6 @@
             }
         ];
 
-        // Cours de démonstration pré-chargés en Licence 1 SEG
         const DEFAULT_COURSES = [
             {
                 id: 'crs_demo_micro_1',
@@ -227,7 +232,7 @@
                 title: 'Chapitre 1 : Théorie du Consommateur et Utilité Marginale',
                 content: "1. DÉFINITION DE L'UTILITÉ :\nL'utilité mesure la satisfaction qu'un consommateur retire de la consommation d'un bien ou d'un service.\n\n2. UTILITÉ TOTALE (UT) ET UTILITÉ MARGINALE (Um) :\n- L'utilité totale augmente avec les quantités consommées jusqu'au point de satiété.\n- L'utilité marginale (Um = ΔUT / ΔQ) est décroissante : chaque unité supplémentaire procure une satisfaction moindre.\n\n3. ÉQUILIBRE DU CONSOMMATEUR :\nSous la contrainte budgétaire R = Px·X + Py·Y, le consommateur maximise sa satisfaction lorsque le rapport des utilités marginales est égal au rapport des prix : UmX / Px = UmY / Py.",
                 mediaUrl: '',
-                mediaDataUrl: '',
+                mediaId: '',
                 mediaMime: '',
                 mediaFileName: '',
                 createdAt: new Date(Date.now() - 86400000).toISOString()
@@ -240,33 +245,42 @@
                 title: 'Les Principes Fondamentaux du Bilan Comptable (SYSCOHADA)',
                 content: "Le bilan est une photographie du patrimoine de l'entreprise à une date donnée.\n\n- ACTIF (Emplois) : Ce que l'entreprise possède (Immobilisations, Stocks, Créances clients, Trésorerie-Actif).\n- PASSIF (Ressources) : L'origine des fonds (Capitaux propres, Dettes financières, Dettes fournisseurs, Trésorerie-Passif).\n\nRÈGLE D'OR : TOTAL ACTIF = TOTAL PASSIF.",
                 mediaUrl: '',
-                mediaDataUrl: '',
+                mediaId: '',
                 mediaMime: '',
                 mediaFileName: '',
                 createdAt: new Date(Date.now() - 43200000).toISOString()
-            },
-            {
-                id: 'crs_demo_stat_1',
-                categoryId: 'seg',
-                subject: 'STATISTIQUES',
-                subSection: 'audio',
-                title: 'Explication Audio : Moyenne, Médiane et Écart-type expliqués simplement',
-                content: "Écoutez ou lisez cette synthèse vocale détaillée pour maîtriser le calcul des paramètres de tendance centrale et de dispersion en Licence 1 SEG sans difficulté.",
-                mediaUrl: '',
-                mediaDataUrl: '',
-                mediaMime: '',
-                mediaFileName: '',
-                createdAt: new Date(Date.now() - 21600000).toISOString()
             }
         ];
 
         // ============================================================================
-        // BASE DE DONNÉES INDEXEDDB POUR COURS, FICHIERS LOURDS & ESPACE HORS-LIGNE
+        // GESTION DES URLS BLOB TEMPORAIRES (CRÉATION & RÉVOCATION PROPRE)
+        // ============================================================================
+        const ObjectUrlManager = {
+            activeUrls: new Set(),
+            create(blob, mimeType) {
+                const typedBlob = (mimeType && blob.type !== mimeType)
+                    ? new Blob([blob], { type: mimeType })
+                    : blob;
+                const url = URL.createObjectURL(typedBlob);
+                this.activeUrls.add(url);
+                return url;
+            },
+            revokeAll() {
+                this.activeUrls.forEach(url => {
+                    try { URL.revokeObjectURL(url); } catch (e) {}
+                });
+                this.activeUrls.clear();
+            }
+        };
+
+        // ============================================================================
+        // BASE DE DONNÉES INDEXEDDB : ZLEV_SCC_MediaDB
+        // Stocke les fichiers binaires (PDF, Audio, Vidéo) et le casier hors-ligne
         // ============================================================================
         const MediaDB = {
-            DB_NAME: 'ZLEV_SCC_PERSISTENT_DB',
-            STORE_COURSES: 'courses',
-            STORE_LOCKER: 'offline_locker',
+            DB_NAME: 'ZLEV_SCC_MediaDB',
+            STORE_MEDIA: 'media_blobs',
+            STORE_LOCKER: 'student_offline_locker',
             db: null,
 
             async init() {
@@ -275,8 +289,8 @@
                     const req = indexedDB.open(this.DB_NAME, 1);
                     req.onupgradeneeded = (e) => {
                         const db = e.target.result;
-                        if (!db.objectStoreNames.contains(this.STORE_COURSES)) {
-                            db.createObjectStore(this.STORE_COURSES, { keyPath: 'id' });
+                        if (!db.objectStoreNames.contains(this.STORE_MEDIA)) {
+                            db.createObjectStore(this.STORE_MEDIA, { keyPath: 'mediaId' });
                         }
                         if (!db.objectStoreNames.contains(this.STORE_LOCKER)) {
                             db.createObjectStore(this.STORE_LOCKER, { keyPath: 'lockerKey' });
@@ -290,43 +304,87 @@
                 });
             },
 
-            async getAllCourses() {
+            inferMimeType(fileName = '', subSection = '') {
+                const ext = (fileName.split('.').pop() || '').toLowerCase();
+                const map = {
+                    pdf: 'application/pdf',
+                    mp3: 'audio/mpeg',
+                    wav: 'audio/wav',
+                    ogg: 'audio/ogg',
+                    m4a: 'audio/mp4',
+                    aac: 'audio/aac',
+                    mp4: 'video/mp4',
+                    webm: 'video/webm',
+                    mov: 'video/quicktime',
+                    mkv: 'video/x-matroska'
+                };
+                if (map[ext]) return map[ext];
+                if (subSection === 'audio') return 'audio/mpeg';
+                if (subSection === 'video') return 'video/mp4';
+                return 'application/octet-stream';
+            },
+
+            async saveMediaFile(file, subSection = '', onProgress = null) {
                 const db = await this.init();
+                const mediaId = 'med_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+                const mimeType = file.type || this.inferMimeType(file.name, subSection);
+
+                if (onProgress) onProgress(30);
+                const buffer = await file.arrayBuffer();
+                if (onProgress) onProgress(70);
+
+                const blob = new Blob([buffer], { type: mimeType });
+
                 return new Promise((resolve, reject) => {
-                    const tx = db.transaction(this.STORE_COURSES, 'readonly');
-                    const store = tx.objectStore(this.STORE_COURSES);
-                    const req = store.getAll();
+                    const tx = db.transaction(this.STORE_MEDIA, 'readwrite');
+                    const store = tx.objectStore(this.STORE_MEDIA);
+                    const record = {
+                        mediaId,
+                        blob,
+                        mimeType,
+                        fileName: file.name || 'document',
+                        size: blob.size,
+                        savedAt: new Date().toISOString()
+                    };
+                    const req = store.put(record);
                     req.onsuccess = () => {
-                        const list = req.result || [];
-                        list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                        resolve(list);
+                        if (onProgress) onProgress(100);
+                        resolve({
+                            mediaId,
+                            mimeType,
+                            fileName: record.fileName,
+                            size: record.size
+                        });
                     };
                     req.onerror = () => reject(req.error);
                 });
             },
 
-            async saveCourse(courseObj) {
+            async getMediaRecord(mediaId) {
+                if (!mediaId) return null;
                 const db = await this.init();
                 return new Promise((resolve, reject) => {
-                    const tx = db.transaction(this.STORE_COURSES, 'readwrite');
-                    const store = tx.objectStore(this.STORE_COURSES);
-                    const req = store.put(courseObj);
-                    req.onsuccess = () => resolve(courseObj);
+                    const tx = db.transaction(this.STORE_MEDIA, 'readonly');
+                    const store = tx.objectStore(this.STORE_MEDIA);
+                    const req = store.get(mediaId);
+                    req.onsuccess = () => resolve(req.result || null);
                     req.onerror = () => reject(req.error);
                 });
             },
 
-            async deleteCourse(courseId) {
+            async deleteMediaRecord(mediaId) {
+                if (!mediaId) return;
                 const db = await this.init();
-                return new Promise((resolve, reject) => {
-                    const tx = db.transaction(this.STORE_COURSES, 'readwrite');
-                    const store = tx.objectStore(this.STORE_COURSES);
-                    const req = store.delete(courseId);
+                return new Promise((resolve) => {
+                    const tx = db.transaction(this.STORE_MEDIA, 'readwrite');
+                    const store = tx.objectStore(this.STORE_MEDIA);
+                    const req = store.delete(mediaId);
                     req.onsuccess = () => resolve(true);
-                    req.onerror = () => reject(req.error);
+                    req.onerror = () => resolve(false);
                 });
             },
 
+            // --- CASIER HORS-LIGNE DE L'ÉTUDIANT ---
             async getUserLocker(email) {
                 const db = await this.init();
                 const prefix = email.toLowerCase() + '::';
@@ -335,8 +393,9 @@
                     const store = tx.objectStore(this.STORE_LOCKER);
                     const req = store.getAll();
                     req.onsuccess = () => {
-                        const all = req.result || [];
-                        resolve(all.filter(item => item.lockerKey.startsWith(prefix)));
+                        const list = (req.result || []).filter(item => item.lockerKey.startsWith(prefix));
+                        list.sort((a, b) => new Date(b.savedOfflineAt) - new Date(a.savedOfflineAt));
+                        resolve(list);
                     };
                     req.onerror = () => reject(req.error);
                 });
@@ -348,12 +407,26 @@
                 const existing = await this.getUserLocker(email);
                 if (existing.some(i => i.id === course.id)) return false;
 
+                // Dupliquer le Blob binaire dans l'entrée du casier pour garantir une disponibilité 100% autonome hors-ligne
+                let offlineBlob = null;
+                let offlneBlob = null;
+                let offlineMime = course.mediaMime || '';
+                if (course.mediaId) {
+                    const mediaRec = await this.getMediaRecord(course.mediaId);
+                    if (mediaRec && mediaRec.blob) {
+                        offlineBlob = mediaRec.blob;
+                        offlineMime = mediaRec.mimeType || offlineMime;
+                    }
+                }
+
                 return new Promise((resolve, reject) => {
                     const tx = db.transaction(this.STORE_LOCKER, 'readwrite');
                     const store = tx.objectStore(this.STORE_LOCKER);
                     const req = store.put({
                         ...course,
                         lockerKey,
+                        offlineBlob,
+                        mediaMime: offlineMime,
                         savedOfflineAt: new Date().toISOString()
                     });
                     req.onsuccess = () => resolve(true);
@@ -364,27 +437,27 @@
             async removeFromUserLocker(email, courseId) {
                 const db = await this.init();
                 const lockerKey = email.toLowerCase() + '::' + courseId;
-                return new Promise((resolve, reject) => {
+                return new Promise((resolve) => {
                     const tx = db.transaction(this.STORE_LOCKER, 'readwrite');
                     const store = tx.objectStore(this.STORE_LOCKER);
                     const req = store.delete(lockerKey);
                     req.onsuccess = () => resolve(true);
-                    req.onerror = () => reject(req.error);
+                    req.onerror = () => resolve(false);
                 });
             }
         };
 
         // ============================================================================
-        // GESTIONNAIRE DE STOCKAGE & RECONNAISSANCE INTERNE (LOCALSTORAGE + INDEXEDDB)
+        // GESTIONNAIRE DE DONNÉES APPLICATIVES (LOCALSTORAGE + INDEXEDDB)
         // ============================================================================
         const Store = {
             KEYS: {
-                USERS: 'zlev_scc_users_registry_v3',
-                CURRENT_USER: 'zlev_scc_active_session_v3',
-                CATEGORIES: 'zlev_scc_categories_v3',
-                FEEDBACKS: 'zlev_scc_feedbacks_v3',
-                ANALYTICS: 'zlev_scc_analytics_v3',
-                SEEDED: 'zlev_scc_seeded_v3'
+                USERS: 'zlev_scc_users_v4',
+                CURRENT_USER: 'zlev_scc_session_v4',
+                CATEGORIES: 'zlev_scc_categories_v4',
+                COURSES: 'zlev_scc_courses_meta_v4',
+                FEEDBACKS: 'zlev_scc_feedbacks_v4',
+                ANALYTICS: 'zlev_scc_analytics_v4'
             },
 
             async init() {
@@ -393,6 +466,9 @@
                 }
                 if (!localStorage.getItem(this.KEYS.CATEGORIES)) {
                     localStorage.setItem(this.KEYS.CATEGORIES, JSON.stringify(DEFAULT_CATEGORIES));
+                }
+                if (!localStorage.getItem(this.KEYS.COURSES)) {
+                    localStorage.setItem(this.KEYS.COURSES, JSON.stringify(DEFAULT_COURSES));
                 }
                 if (!localStorage.getItem(this.KEYS.FEEDBACKS)) {
                     localStorage.setItem(this.KEYS.FEEDBACKS, JSON.stringify([]));
@@ -409,12 +485,6 @@
                 }
 
                 await MediaDB.init();
-                if (!localStorage.getItem(this.KEYS.SEEDED)) {
-                    for (const course of DEFAULT_COURSES) {
-                        await MediaDB.saveCourse(course);
-                    }
-                    localStorage.setItem(this.KEYS.SEEDED, '1');
-                }
             },
 
             // --- UTILISATEURS & VALIDATION ---
@@ -448,31 +518,29 @@
                     if (users[existingIndex].status === 'approved') {
                         return {
                             ok: false,
-                            message: "Cet email est déjà validé dans notre système ! Utilisez l'onglet 'Connexion' avec votre code."
+                            message: "Cet email est déjà validé dans le système ! Utilisez l'onglet 'Connexion' avec votre code."
                         };
                     }
-                    // Mettre à jour la demande en attente existante
                     users[existingIndex].code = cleanCode;
                     users[existingIndex].requestedAt = new Date().toISOString();
                     this.saveAllUsers(users);
                     return {
                         ok: true,
-                        message: "Votre demande d'accès a été mise à jour et transmise à l'administrateur ZONGO ISMAEL."
+                        message: "Votre demande d'accès a été mise à jour et envoyée à l'administrateur ZONGO ISMAEL."
                     };
                 }
 
-                const newUser = {
+                users.unshift({
                     id: 'usr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
                     email: cleanEmail,
                     code: cleanCode,
                     status: 'pending',
                     requestedAt: new Date().toISOString()
-                };
-                users.unshift(newUser);
+                });
                 this.saveAllUsers(users);
                 return {
                     ok: true,
-                    message: "Demande envoyée ! Tant que l'administrateur n'a pas validé votre demande, l'accès reste bloqué."
+                    message: "Demande transmise ! Tant que l'administrateur n'a pas validé votre inscription, l'accès reste bloqué."
                 };
             },
 
@@ -485,13 +553,13 @@
                 this.saveAllUsers(users);
                 return true;
             },
-              deleteUser(userId) {
+
+            deleteUser(userId) {
                 const users = this.getAllUsers();
                 const target = users.find(u => u.id === userId);
                 const updated = users.filter(u => u.id !== userId);
                 this.saveAllUsers(updated);
 
-                // Si l'utilisateur supprimé était connecté, déconnecter immédiatement
                 const current = this.getCurrentUser();
                 if (current && target && !current.isAdmin && current.email.toLowerCase() === target.email.toLowerCase()) {
                     this.logout();
@@ -503,7 +571,6 @@
                 const cleanEmail = email.trim().toLowerCase();
                 const cleanCode = code.trim();
 
-                // Permettre aussi la connexion Admin directe si l'admin utilise le formulaire principal
                 if ((cleanEmail === ADMIN_EMAIL || cleanEmail === 'admin') && cleanCode === ADMIN_SECRET_CODE) {
                     const adminSession = { email: ADMIN_EMAIL, isAdmin: true, status: 'approved' };
                     this.setCurrentUser(adminSession);
@@ -516,7 +583,7 @@
                 if (!found) {
                     return {
                         ok: false,
-                        message: "Accès rejeté : Email non reconnu (ou compte supprimé par l'administrateur). Veuillez faire une nouvelle demande."
+                        message: "Accès rejeté : Email inconnu ou supprimé par l'administrateur. Veuillez soumettre une nouvelle demande."
                     };
                 }
 
@@ -528,6 +595,12 @@
                 }
 
                 if (found.code !== cleanCode) {
+                    return {
+                        ok: false,
+                        message: "Code d'entrée incorrect pour cette adresse email."
+                    };
+        }
+        if (found.code !== cleanCode) {
                     return {
                         ok: false,
                         message: "Code d'entrée incorrect pour cette adresse email."
@@ -551,7 +624,6 @@
                     if (!session) return null;
                     if (session.isAdmin) return session;
 
-                    // Vérification continue dans le registre interne
                     const users = this.getAllUsers();
                     const stillApproved = users.find(
                         u => u.email.toLowerCase() === session.email.toLowerCase() && u.status === 'approved'
@@ -586,7 +658,26 @@
             saveCategories(cats) {
                 localStorage.setItem(this.KEYS.CATEGORIES, JSON.stringify(cats));
             },
-              addSubjectToCategory(categoryId, subjectName) {
+
+            addCategory(name, subtitle, icon = '📘') {
+                const cats = this.getCategories();
+                const cleanName = name.trim();
+                if (!cleanName) return null;
+                const id = 'cat_' + Date.now();
+                const newCat = {
+                    id,
+                    name: cleanName,
+                    subtitle: subtitle.trim() || 'Nouvelle filière / classe ajoutée par l’administrateur',
+                    icon,
+                    accent: 'border-[#009E49]',
+                    subjects: ['INTRODUCTION GÉNÉRALE']
+                };
+                cats.push(newCat);
+                this.saveCategories(cats);
+                return newCat;
+            },
+
+            addSubjectToCategory(categoryId, subjectName) {
                 const cats = this.getCategories();
                 const cat = cats.find(c => c.id === categoryId);
                 if (!cat) return false;
@@ -599,23 +690,41 @@
                 return true;
             },
 
-            // --- COURS (INDEXEDDB) ---
-            async getCourses() {
-                return await MediaDB.getAllCourses();
+            // --- COURS (MÉTADONNÉES EN LOCALSTORAGE + BLOBS BINAIRES EN INDEXEDDB) ---
+            getCourses() {
+                try {
+                    const list = JSON.parse(localStorage.getItem(this.KEYS.COURSES)) || [];
+                    list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    return list;
+                } catch (e) {
+                    return [];
+                }
             },
 
-            async addCourse(courseObj) {
+            saveCourses(courses) {
+                localStorage.setItem(this.KEYS.COURSES, JSON.stringify(courses));
+            },
+
+            addCourse(courseObj) {
+                const courses = this.getCourses();
                 const newCourse = {
                     id: 'crs_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
                     ...courseObj,
                     createdAt: new Date().toISOString()
                 };
-                await MediaDB.saveCourse(newCourse);
+                courses.unshift(newCourse);
+                this.saveCourses(courses);
                 return newCourse;
             },
 
             async deleteCourse(courseId) {
-                await MediaDB.deleteCourse(courseId);
+                const courses = this.getCourses();
+                const target = courses.find(c => c.id === courseId);
+                if (target && target.mediaId) {
+                    await MediaDB.deleteMediaRecord(target.mediaId);
+                }
+                const updated = courses.filter(c => c.id !== courseId);
+                this.saveCourses(updated);
             },
 
             // --- NOTES & CRITIQUES ---
@@ -656,21 +765,406 @@
                 if (!a.categoryVisits) a.categoryVisits = {};
                 a.categoryVisits[catId] = (a.categoryVisits[catId] || 0) + 1;
                 localStorage.setItem(this.KEYS.ANALYTICS, JSON.stringify(a));
-            },
-
-            // --- ESPACE PERSONNEL HORS-LIGNE ---
-            async getUserLocker(email) {
-                return await MediaDB.getUserLocker(email);
-            },
-
-            async saveToUserLocker(email, course) {
-                return await MediaDB.saveToUserLocker(email, course);
-            },
-
-            async removeFromUserLocker(email, courseId) {
-                return await MediaDB.removeFromUserLocker(email, courseId);
             }
         };
+
+        // ============================================================================
+        // MOTEUR DE LECTURE UNIVERSEL (PDF.JS CANVAS HD + AUDIO + VIDÉO + LIENS)
+        // ============================================================================
+        function parseExternalMediaUrl(rawUrl) {
+            const url = (rawUrl || '').trim();
+            if (!url) return null;
+
+            const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([^&?/]+)/);
+            if (ytMatch) {
+                return { kind: 'iframe', src: `https://www.youtube.com/embed/${ytMatch[1]}?rel=0` };
+            }
+
+            const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+            if (driveMatch) {
+                return { kind: 'iframe', src: `https://drive.google.com/file/d/${driveMatch[1]}/preview` };
+            }
+
+            if (/\.pdf(\?.*)?$/i.test(url)) return { kind: 'pdf_url', src: url };
+            if (/\.(mp3|wav|ogg|m4a|aac)(\?.*)?$/i.test(url)) return { kind: 'audio_url', src: url };
+            if (/\.(mp4|webm|mov|mkv)(\?.*)?$/i.test(url)) return { kind: 'video_url', src: url };
+
+            return { kind: 'auto_url', src: url };
+        }
+
+        function buildMediaSlotHTML(course) {
+            const hasBinary = Boolean(course.mediaId || course.offlineBlob);
+            const extUrl = (course.mediaUrl || '').trim();
+
+            if (!hasBinary && !extUrl) return '';
+
+            if (hasBinary) {
+                return `
+                    <div class="mt-4 media-slot-container" data-course-id="${escapeHtml(course.id)}">
+                        <div class="p-4 rounded-2xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-600 flex items-center gap-2">
+                            <span class="animate-spin">⏳</span> Préparation du média (${escapeHtml(course.mediaFileName || 'Fichier')})...
+                        </div>
+                    </div>
+                `;
+            }
+
+            const parsed = parseExternalMediaUrl(extUrl);
+            if (!parsed) return '';
+
+            if (parsed.kind === 'iframe') {
+                return `
+                    <div class="mt-4 aspect-video rounded-2xl overflow-hidden bg-black shadow-inner border border-slate-200">
+                        <iframe class="w-full h-full" src="${escapeHtml(parsed.src)}" frameborder="0" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+                    </div>
+                `;
+            }
+
+            if (parsed.kind === 'pdf_url') {
+                return `
+                    <div class="mt-4 media-slot-container" data-course-id="${escapeHtml(course.id)}" data-external-pdf="${escapeHtml(parsed.src)}">
+                        <div class="p-4 rounded-2xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-600 flex items-center gap-2">
+                            <span class="animate-spin">⏳</span> Chargement du document PDF...
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (parsed.kind === 'audio_url' || course.subSection === 'audio') {
+                return `
+                    <div class="mt-4 bg-slate-900 text-white p-4 rounded-2xl flex flex-col sm:flex-row items-center gap-3">
+                        <span class="text-2xl">🎧</span>
+                        <div class="w-full">
+                            <audio controls controlsList="nodownload noplaybackrate" preload="metadata" oncontextmenu="return false;" class="w-full">
+                                <source src="${escapeHtml(parsed.src)}">
+                                Votre navigateur ne supporte pas la lecture audio.
+                            </audio>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="mt-4 rounded-2xl overflow-hidden bg-black border border-slate-800">
+                    <video controls playsinline controlsList="nodownload" preload="metadata" oncontextmenu="return false;" class="w-full max-h-[460px] bg-black">
+                        <source src="${escapeHtml(parsed.src)}">
+                        Votre navigateur ne supporte pas la lecture vidéo.
+                    </video>
+                </div>
+            `;
+        }
+
+        /**
+         * Rendu PDF interactif via PDF.js (<canvas> HD multi-pages, zoom, navigation)
+         * Fonctionne sur tous les navigateurs mobiles (Chrome Android, Safari iOS) et PC
+         */
+        async function renderPdfJsViewer(slotElement, pdfSource, blobUrl, fileName) {
+            if (!window.pdfjsLib) {
+                renderPdfFallback(slotElement, blobUrl, fileName);
+                return;
+            }
+
+            try {
+                const loadingTask = window.pdfjsLib.getDocument(pdfSource);
+                const pdfDoc = await loadingTask.promise;
+                const totalPages = pdfDoc.numPages;
+
+                let currentPage = 1;
+                let currentScale = window.innerWidth < 640 ? 1.05 : 1.35;
+                let renderTaskInProgress = false;
+
+                slotElement.innerHTML = `
+                    <div class="rounded-2xl overflow-hidden border-2 border-slate-300 bg-slate-900 shadow-lg" oncontextmenu="return false;">
+                        <!-- Barre d'outils PDF.js -->
+                        <div class="bg-slate-900 text-white px-3 sm:px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 border-b border-slate-700">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="text-base">📄</span>
+                                <span class="text-xs font-extrabold text-[#FCD116] truncate max-w-[160px] sm:max-w-xs">${escapeHtml(fileName)}</span>
+                            </div>
+          <div class="flex flex-wrap items-center gap-1.5">
+                                <button type="button" class="pdf-prev-btn bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-white px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer">
+                                    ◀ Préc.
+                                </button>
+                                <span class="pdf-page-indicator bg-slate-800 border border-slate-600 px-2.5 py-1 rounded-lg text-xs font-extrabold text-white">
+                                    Page 1 / ${totalPages}
+                                </span>
+                                <button type="button" class="pdf-next-btn bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-white px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer">
+                                    Suiv. ▶
+                                </button>
+                                <button type="button" class="pdf-zoom-out-btn bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-1 rounded-lg text-xs font-extrabold cursor-pointer" title="Réduire">
+                                    ➖
+                                </button>
+                                <button type="button" class="pdf-zoom-in-btn bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-1 rounded-lg text-xs font-extrabold cursor-pointer" title="Agrandir">
+                                    ➕
+                                </button>
+                                <button type="button" class="pdf-fullscreen-btn bg-[#FCD116] hover:bg-yellow-300 text-slate-950 px-2.5 py-1 rounded-lg text-xs font-extrabold cursor-pointer">
+                                    🔍 Plein écran
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Zone de rendu Canvas HD défilable -->
+                        <div class="pdf-canvas-wrapper bg-slate-200 overflow-auto max-h-[560px] p-3 sm:p-5 flex justify-center items-start">
+                            <canvas class="pdf-render-canvas shadow-xl bg-white rounded-lg max-w-full h-auto"></canvas>
+                        </div>
+                    </div>
+                `;
+
+                const canvas = slotElement.querySelector('.pdf-render-canvas');
+                const ctx = canvas.getContext('2d');
+                const prevBtn = slotElement.querySelector('.pdf-prev-btn');
+                const nextBtn = slotElement.querySelector('.pdf-next-btn');
+                const indicator = slotElement.querySelector('.pdf-page-indicator');
+                const zoomInBtn = slotElement.querySelector('.pdf-zoom-in-btn');
+                const zoomOutBtn = slotElement.querySelector('.pdf-zoom-out-btn');
+                const fullscreenBtn = slotElement.querySelector('.pdf-fullscreen-btn');
+                const wrapper = slotElement.querySelector('.pdf-canvas-wrapper');
+
+                async function renderPage(pageNum) {
+                    if (renderTaskInProgress) return;
+                    renderTaskInProgress = true;
+                    try {
+                        const page = await pdfDoc.getPage(pageNum);
+                        const unscaledViewport = page.getViewport({ scale: 1 });
+                        const containerWidth = Math.max(280, (wrapper.clientWidth || 340) - 24);
+                        const fitScale = containerWidth / unscaledViewport.width;
+                        const effectiveScale = fitScale * currentScale;
+
+                        const outputScale = Math.min(window.devicePixelRatio || 1, 2);
+                        const viewport = page.getViewport({ scale: effectiveScale });
+
+                        canvas.width = Math.floor(viewport.width * outputScale);
+                        canvas.height = Math.floor(viewport.height * outputScale);
+                        canvas.style.width = Math.floor(viewport.width) + 'px';
+                        canvas.style.height = Math.floor(viewport.height) + 'px';
+
+                        const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+
+                        await page.render({
+                            canvasContext: ctx,
+                            transform,
+                            viewport
+                        }).promise;
+
+                        indicator.textContent = `Page ${pageNum} / ${totalPages}`;
+                        prevBtn.disabled = pageNum <= 1;
+                        nextBtn.disabled = pageNum >= totalPages;
+                    } finally {
+                        renderTaskInProgress = false;
+                    }
+                }
+
+                prevBtn.addEventListener('click', () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderPage(currentPage);
+                    }
+                });
+
+                nextBtn.addEventListener('click', () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderPage(currentPage);
+                    }
+                });
+
+                zoomInBtn.addEventListener('click', () => {
+                    currentScale = Math.min(2.6, currentScale + 0.25);
+                    renderPage(currentPage);
+                });
+
+                zoomOutBtn.addEventListener('click', () => {
+                    currentScale = Math.max(0.6, currentScale - 0.25);
+                    renderPage(currentPage);
+                });
+
+                fullscreenBtn.addEventListener('click', () => {
+                    if (blobUrl) {
+                        window.open(blobUrl, '_blank', 'noopener');
+                    } else if (typeof pdfSource === 'string') {
+                        window.open(pdfSource, '_blank', 'noopener');
+                    }
+                });
+
+                await renderPage(currentPage);
+            } catch (err) {
+                console.warn('PDF.js fallback activé:', err);
+                renderPdfFallback(slotElement, blobUrl, fileName);
+            }
+        }
+
+        function renderPdfFallback(slotElement, blobUrl, fileName) {
+            slotElement.innerHTML = `
+                <div class="rounded-2xl overflow-hidden border border-slate-300 bg-slate-100 shadow-sm" oncontextmenu="return false;">
+                    <div class="bg-slate-900 text-white px-4 py-2.5 text-xs font-bold flex flex-wrap items-center justify-between gap-2">
+                        <span class="truncate">📄 Document PDF : ${escapeHtml(fileName)}</span>
+                        <button type="button" class="pdf-fallback-open-btn bg-[#FCD116] text-slate-950 px-3.5 py-1.5 rounded-xl font-extrabold text-xs cursor-pointer">
+                            🔍 Ouvrir le PDF en plein écran
+                        </button>
+                    </div>
+                    <object data="${blobUrl}#toolbar=0" type="application/pdf" class="w-full h-[500px] bg-white">
+                        <embed src="${blobUrl}#toolbar=0" type="application/pdf" class="w-full h-[500px]" />
+                    </object>
+                </div>
+            `;
+            const btn = slotElement.querySelector('.pdf-fallback-open-btn');
+            if (btn && blobUrl) {
+                btn.addEventListener('click', () => window.open(blobUrl, '_blank', 'noopener'));
+            }
+        }
+
+        function renderAudioPlayer(slotElement, blobUrl, mimeType, fileName, onReload) {
+            slotElement.innerHTML = `
+                <div class="bg-slate-900 text-white p-4 rounded-2xl shadow-inner border border-slate-700" oncontextmenu="return false;">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="text-2xl">🎧</span>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-xs font-extrabold text-[#FCD116] truncate">${escapeHtml(fileName)}</div>
+                            <div class="text-[11px] text-slate-400">Écoute audio intégrée • Lecture fluide</div>
+                        </div>
+                    </div>
+                    <audio controls controlsList="nodownload noplaybackrate" preload="metadata" oncontextmenu="return false;" class="w-full">
+                        <source src="${blobUrl}" type="${escapeHtml(mimeType || 'audio/mpeg')}">
+                        Votre navigateur ne supporte pas la lecture audio.
+                    </audio>
+                    <div class="media-error-box hidden mt-3 p-3 rounded-xl bg-red-950/80 border border-[#EF2B2D] text-xs text-red-200 flex items-center justify-between gap-2">
+                        <span>⚠️ Impossible de lire ce fichier audio (format non supporté ou fichier corrompu).</span>
+                        <button type="button" class="reload-media-btn bg-[#FCD116] text-slate-950 font-extrabold px-3 py-1 rounded-lg shrink-0 cursor-pointer">
+                            Recharger le média
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            const audioEl = slotElement.querySelector('audio');
+            const errBox = slotElement.querySelector('.media-error-box');
+            const reloadBtn = slotElement.querySelector('.reload-media-btn');
+
+            audioEl.addEventListener('error', () => {
+                errBox.classList.remove('hidden');
+            }, true);
+
+            reloadBtn.addEventListener('click', () => {
+                if (onReload) onReload();
+            });
+
+            audioEl.load();
+        }
+
+        function renderVideoPlayer(slotElement, blobUrl, mimeType, fileName, onReload) {
+            slotElement.innerHTML = `
+                <div class="rounded-2xl overflow-hidden bg-black border border-slate-800 shadow-lg" oncontextmenu="return false;">
+                    <div class="bg-slate-900 text-slate-200 px-4 py-2 text-xs font-bold flex items-center justify-between gap-2">
+                        <span class="truncate">🎬 Vidéo : ${escapeHtml(fileName)}</span>
+                        <span class="text-[11px] text-[#FCD116]">Visionnage sécurisé</span>
+                    </div>
+                    <video controls playsinline controlsList="nodownload" preload="metadata" oncontextmenu="return false;" class="w-full max-h-[460px] bg-black">
+                        <source src="${blobUrl}" type="${escapeHtml(mimeType || 'video/mp4')}">
+                        Votre navigateur ne supporte pas la lecture vidéo.
+                    </video>
+                    <div class="media-error-box hidden p-3 bg-red-950 text-xs text-red-200 flex items-center justify-between gap-2">
+                        <span>⚠️ Impossible de lire cette vidéo (codec non supporté ou fichier endommagé).</span>
+                        <button type="button" class="reload-media-btn bg-[#FCD116] text-slate-950 font-extrabold px-3 py-1 rounded-lg shrink-0 cursor-pointer">
+                            Recharger le média
+                        </button>
+                    </div>
+                </div>
+            `;
+        const videoEl = slotElement.querySelector('video');
+            const errBox = slotElement.querySelector('.media-error-box');
+            const reloadBtn = slotElement.querySelector('.reload-media-btn');
+
+            videoEl.addEventListener('error', () => {
+                errBox.classList.remove('hidden');
+            }, true);
+
+            reloadBtn.addEventListener('click', () => {
+                if (onReload) onReload();
+            });
+
+            videoEl.load();
+        }
+
+        async function hydrateSingleSlot(slot, course) {
+            const externalPdfUrl = slot.getAttribute('data-external-pdf');
+            if (externalPdfUrl) {
+                await renderPdfJsViewer(slot, externalPdfUrl, externalPdfUrl, course.title || 'Document PDF');
+                return;
+            }
+
+            let blob = null;
+            let mimeType = course.mediaMime || '';
+            let fileName = course.mediaFileName || course.title || 'Document';
+
+            if (course.offlineBlob instanceof Blob) {
+                blob = course.offlineBlob;
+                mimeType = blob.type || mimeType;
+            } else if (course.mediaId) {
+                const record = await MediaDB.getMediaRecord(course.mediaId);
+                if (record && record.blob) {
+                    blob = record.blob;
+                    mimeType = record.mimeType || blob.type || mimeType;
+                    fileName = record.fileName || fileName;
+                }
+            }
+
+            if (!blob) {
+                slot.innerHTML = `
+                    <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-xs font-bold text-[#EF2B2D] flex items-center justify-between gap-2">
+                        <span>⚠️ Le fichier média est introuvable dans le stockage local. Demandez à l'administrateur de le réimporter.</span>
+                    </div>
+                `;
+                return;
+            }
+
+            if (!mimeType || mimeType === 'application/octet-stream') {
+                mimeType = MediaDB.inferMimeType(fileName, course.subSection);
+            }
+
+            const blobUrl = ObjectUrlManager.create(blob, mimeType);
+            const lowerName = fileName.toLowerCase();
+
+            const isPdf = mimeType.includes('pdf') || lowerName.endsWith('.pdf');
+            const isAudio = mimeType.startsWith('audio/') ||
+                /\.(mp3|wav|ogg|m4a|aac)$/.test(lowerName) ||
+                (!isPdf && !mimeType.startsWith('video/') && course.subSection === 'audio');
+            const isVideo = mimeType.startsWith('video/') ||
+                /\.(mp4|webm|mov|mkv)$/.test(lowerName) ||
+                (!isPdf && !isAudio && course.subSection === 'video');
+
+            const reloadFn = () => hydrateSingleSlot(slot, course);
+
+            if (isPdf) {
+                const arrayBuffer = await blob.arrayBuffer();
+                await renderPdfJsViewer(slot, { data: arrayBuffer }, blobUrl, fileName);
+            } else if (isAudio) {
+                renderAudioPlayer(slot, blobUrl, mimeType, fileName, reloadFn);
+            } else if (isVideo) {
+                renderVideoPlayer(slot, blobUrl, mimeType, fileName, reloadFn);
+            } else {
+                slot.innerHTML = `
+                    <div class="p-4 rounded-2xl bg-slate-100 border border-slate-300 flex items-center justify-between gap-3">
+                        <span class="text-xs font-bold text-slate-800 truncate">📎 Fichier : ${escapeHtml(fileName)}</span>
+                        <button type="button" class="open-blob-generic bg-slate-900 text-[#FCD116] px-4 py-2 rounded-xl text-xs font-extrabold cursor-pointer">
+                            Ouvrir le fichier
+                        </button>
+                    </div>
+                `;
+                slot.querySelector('.open-blob-generic').addEventListener('click', () => {
+                    window.open(blobUrl, '_blank', 'noopener');
+                });
+            }
+        }
+
+        async function hydrateAllMediaSlots(root, courseList) {
+            const slots = root.querySelectorAll('.media-slot-container');
+            for (const slot of slots) {
+                const courseId = slot.getAttribute('data-course-id');
+                const course = courseList.find(c => c.id === courseId);
+                if (course) {
+                    await hydrateSingleSlot(slot, course);
+                }
+            }
+        }
 
         // ============================================================================
         // UTILITAIRES INTERFACE & ROUTEUR
@@ -721,7 +1215,8 @@
                 setTimeout(() => toast.remove(), 300);
             }, 4000);
         }
-       function openModal(htmlContent) {
+
+        function openModal(htmlContent) {
             const modal = document.getElementById('modal-container');
             modal.innerHTML = htmlContent;
             modal.classList.remove('hidden');
@@ -777,8 +1272,7 @@
                 await renderApp();
             }
         };
-
-        // ============================================================================
+         // ============================================================================
         // RENDU DE L'EN-TÊTE & NAVIGATION
         // ============================================================================
         async function renderHeaderActions() {
@@ -816,7 +1310,7 @@
                 document.getElementById('hdr-admin-btn').addEventListener('click', () => router.openAdmin());
                 document.getElementById('hdr-logout-btn').addEventListener('click', handleLogout);
             } else {
-                const lockerItems = await Store.getUserLocker(user.email);
+                const lockerItems = await MediaDB.getUserLocker(user.email);
                 container.innerHTML = `
                     <div class="bg-black/40 border border-white/20 px-3 py-1.5 rounded-xl text-xs text-slate-100 hidden sm:block">
                         Étudiant : <strong class="text-[#FCD116]">${escapeHtml(user.email)}</strong>
@@ -847,6 +1341,7 @@
         // RENDU PRINCIPAL
         // ============================================================================
         async function renderApp() {
+            ObjectUrlManager.revokeAll();
             await renderHeaderActions();
             const root = document.getElementById('app-root');
             const user = Store.getCurrentUser();
@@ -855,17 +1350,17 @@
                 renderAuthGate(root);
                 return;
             }
-            
+
             switch (router.state.view) {
                 case 'admin':
                     if (user.isAdmin) await renderAdminDashboard(root);
-                    else await renderCategoriesHome(root);
+                    else renderCategoriesHome(root);
                     break;
                 case 'category':
-                    await renderCategorySubjects(root, router.state.categoryId);
+                    renderCategorySubjects(root, router.state.categoryId);
                     break;
                 case 'subject':
-                    await renderSubjectSubSections(root, router.state.categoryId, router.state.subjectName);
+                    renderSubjectSubSections(root, router.state.categoryId, router.state.subjectName);
                     break;
                 case 'subsection':
                     await renderSubSectionContent(root, router.state.categoryId, router.state.subjectName, router.state.subSectionId);
@@ -874,7 +1369,7 @@
                     await renderOfflineLocker(root, user);
                     break;
                 default:
-                    await renderCategoriesHome(root);
+                    renderCategoriesHome(root);
                     break;
             }
         }
@@ -934,7 +1429,7 @@
                                 </button>
                             </form>
 
-                            <!-- Formulaire Inscription (Demande de validation) -->
+                            <!-- Formulaire Inscription -->
                             <form id="student-register-form" class="space-y-4 hidden">
                                 <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 text-xs text-amber-900">
                                     <strong>Comment ça marche ?</strong> Saisissez votre email et créez votre code personnel. Votre demande sera transmise au tableau de bord de l'administrateur pour validation. Une fois validé, le site mémorisera votre email et votre code automatiquement.
@@ -967,7 +1462,6 @@
                 </div>
             `;
 
-            // Gestion des onglets Connexion / Inscription
             const tabLoginBtn = document.getElementById('tab-login-btn');
             const tabRegBtn = document.getElementById('tab-register-btn');
             const loginForm = document.getElementById('student-login-form');
@@ -981,7 +1475,8 @@
                 tabLoginBtn.className = 'py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-sm bg-white text-slate-900 shadow transition cursor-pointer';
                 tabRegBtn.className = 'py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition cursor-pointer';
             });
-               tabRegBtn.addEventListener('click', () => {
+
+            tabRegBtn.addEventListener('click', () => {
                 feedbackBox.classList.add('hidden');
                 regForm.classList.remove('hidden');
                 loginForm.classList.add('hidden');
@@ -989,17 +1484,13 @@
                 tabLoginBtn.className = 'py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition cursor-pointer';
             });
 
-            // Boutons afficher/masquer mot de passe
             root.querySelectorAll('[data-toggle-pwd]').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const input = document.getElementById(btn.getAttribute('data-toggle-pwd'));
-                    if (input) {
-                        input.type = input.type === 'password' ? 'text' : 'password';
-                    }
+                    if (input) input.type = input.type === 'password' ? 'text' : 'password';
                 });
             });
 
-            // Soumission Connexion
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const email = document.getElementById('login-email').value;
@@ -1016,9 +1507,7 @@
                     feedbackBox.classList.remove('hidden');
                 }
             });
-
-            // Soumission Inscription
-            regForm.addEventListener('submit', (e) => {
+        regForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const email = document.getElementById('reg-email').value;
                 const code = document.getElementById('reg-code').value;
@@ -1039,7 +1528,7 @@
         }
 
         // ============================================================================
-        // 2. MODALE DE CONNEXION ADMINISTRATEUR (CODE EXACT : 12az@#-+ )
+        // 2. MODALE DE CONNEXION ADMINISTRATEUR (CODE : 12az@#-+ )
         // ============================================================================
         function openAdminLoginModal() {
             openModal(`
@@ -1100,9 +1589,9 @@
         // ============================================================================
         // 3. NIVEAU 1 : CATÉGORIES DE CLASSES
         // ============================================================================
-        async function renderCategoriesHome(root) {
+        function renderCategoriesHome(root) {
             const categories = Store.getCategories();
-            const allCourses = await Store.getCourses();
+            const allCourses = Store.getCourses();
 
             root.innerHTML = `
                 <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white/90 backdrop-blur p-5 rounded-3xl shadow-sm border border-slate-200">
@@ -1153,10 +1642,10 @@
         // ============================================================================
         // 4. NIVEAU 2 : MATIÈRES D'UNE CATÉGORIE
         // ============================================================================
-        async function renderCategorySubjects(root, categoryId) {
+        function renderCategorySubjects(root, categoryId) {
             const category = Store.getCategories().find(c => c.id === categoryId);
             if (!category) return router.goHome();
-            const allCourses = await Store.getCourses();
+            const allCourses = Store.getCourses();
             const catCourses = allCourses.filter(c => c.categoryId === categoryId);
 
             root.innerHTML = `
@@ -1165,12 +1654,10 @@
                         class="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-700 hover:text-[#EF2B2D] bg-slate-100 px-4 py-2 rounded-xl shadow-sm mb-4 transition cursor-pointer">
                         ← Retour aux Catégories
                     </button>
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div>
-                            <span class="text-xs font-extrabold uppercase tracking-wider text-[#009E49]">NIVEAU 2 • MATIÈRES DISPONIBLES</span>
-                            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-0.5">${escapeHtml(category.name)}</h2>
-                            <p class="text-xs sm:text-sm text-slate-600 mt-1">Appuyez sur une matière pour ouvrir ses 3 sous-ensembles (Résumés, Vidéo explicative, Audio explicative).</p>
-                        </div>
+                    <div>
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-[#009E49]">NIVEAU 2 • MATIÈRES DISPONIBLES</span>
+                        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-0.5">${escapeHtml(category.name)}</h2>
+                        <p class="text-xs sm:text-sm text-slate-600 mt-1">Appuyez sur une matière pour ouvrir ses 3 sous-ensembles (Résumés du cours, Vidéo explicative, Audio explicative).</p>
                     </div>
                 </div>
 
@@ -1197,6 +1684,7 @@
                     }).join('')}
                 </div>
             `;
+
             document.getElementById('back-to-cats-btn').addEventListener('click', () => router.goHome());
             root.querySelectorAll('.subject-card').forEach(card => {
                 card.addEventListener('click', () => {
@@ -1208,10 +1696,10 @@
         // ============================================================================
         // 5. NIVEAU 3 : LES 3 SOUS-ENSEMBLES D'UNE MATIÈRE
         // ============================================================================
-        async function renderSubjectSubSections(root, categoryId, subjectName) {
+        function renderSubjectSubSections(root, categoryId, subjectName) {
             const category = Store.getCategories().find(c => c.id === categoryId);
             if (!category) return router.goHome();
-            const allCourses = await Store.getCourses();
+            const allCourses = Store.getCourses();
             const subjCourses = allCourses.filter(c => c.categoryId === categoryId && c.subject === subjectName);
 
             root.innerHTML = `
@@ -1260,9 +1748,9 @@
                 });
             });
         }
-
+        
         // ============================================================================
-        // 6. NIVEAU 4 : CONTENU + TÉLÉCHARGEMENT INTERNE + ESPACE DE NOTE/CRITIQUE
+        // 6. NIVEAU 4 : CONTENU (PDF.JS, AUDIO, VIDÉO) + CASIER HORS-LIGNE + CRITIQUE
         // ============================================================================
         async function renderSubSectionContent(root, categoryId, subjectName, subSectionId) {
             const category = Store.getCategories().find(c => c.id === categoryId);
@@ -1270,11 +1758,11 @@
             if (!category || !subObj) return router.goHome();
 
             const user = Store.getCurrentUser();
-            const allCourses = await Store.getCourses();
+            const allCourses = Store.getCourses();
             const courses = allCourses.filter(
                 c => c.categoryId === categoryId && c.subject === subjectName && c.subSection === subSectionId
             );
-            const lockerItems = user && !user.isAdmin ? await Store.getUserLocker(user.email) : [];
+            const lockerItems = user && !user.isAdmin ? await MediaDB.getUserLocker(user.email) : [];
             const lockerIds = lockerItems.map(i => i.id);
 
             root.innerHTML = `
@@ -1292,7 +1780,7 @@
                     </div>
                 </div>
 
-                <!-- Liste des cours publiés dans ce sous-ensemble -->
+                <!-- Liste des cours publiés -->
                 <div class="space-y-6 mb-10">
                     ${courses.length === 0 ? `
                         <div class="bg-white rounded-3xl p-8 text-center border border-slate-200 shadow-sm">
@@ -1316,18 +1804,18 @@
                                     ${user && !user.isAdmin ? `
                                         <button type="button" data-download-id="${escapeHtml(course.id)}"
                                             class="download-locker-btn ${isSaved ? 'bg-slate-800 text-[#FCD116]' : 'bg-[#009E49] hover:bg-emerald-700 text-white'} font-extrabold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow transition flex items-center gap-2 shrink-0 self-start sm:self-center cursor-pointer">
-                                            <span>${isSaved ? '✅ Enregistré Hors-Ligne' : '📥 Télécharger dans mon Espace Hors-Ligne'}</span>
+                                            <span>${isSaved ? '✅ Enregistré dans mon espace hors-ligne' : '📥 Télécharger dans mon espace hors-ligne'}</span>
                                         </button>
                                     ` : ''}
                                 </div>
 
-                                ${(course.mediaDataUrl || course.mediaUrl) ? renderMediaPlayer(course) : ''}
+                                ${buildMediaSlotHTML(course)}
 
                                 <div class="mt-4 text-sm sm:text-base text-slate-700 whitespace-pre-line leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100">
                                     ${escapeHtml(course.content)}
                                 </div>
                                 <p class="text-[11px] text-slate-400 mt-3 flex items-center gap-1.5">
-                                    <span>🔒</span> Téléchargement interne protégé : stocké dans votre espace personnel sur le site (non partageable à l'extérieur) et utilisable sans connexion internet.
+                                    <span>🔒</span> Téléchargement interne protégé : stocké dans votre casier sur le site (non partageable à l'extérieur) et accessible même sans connexion internet.
                                 </p>
                             </div>
                         `;
@@ -1374,16 +1862,23 @@
                 router.openSubject(categoryId, subjectName);
             });
 
+            // Hydratation asynchrone des lecteurs PDF.js, Audio et Vidéo depuis IndexedDB
+            await hydrateAllMediaSlots(root, courses);
+
             root.querySelectorAll('.download-locker-btn').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const courseId = btn.getAttribute('data-download-id');
-                    const course = allCourses.find(c => c.id === courseId);
-                    if (!course || !user || user.isAdmin) return;
-                    const added = await Store.saveToUserLocker(user.email, course);
+                    const targetCourse = courses.find(c => c.id === courseId);
+                    if (!targetCourse || !user) return;
+
+                    btn.disabled = true;
+                    btn.innerHTML = '<span>⏳ Sauvegarde hors-ligne en cours...</span>';
+
+                    const added = await MediaDB.saveToUserLocker(user.email, targetCourse);
                     if (added) {
-                        showToast("Cours téléchargé dans votre Espace Hors-Ligne ! Accessible sans internet.");
+                        showToast("✅ Cours et médias enregistrés dans votre espace hors-ligne !");
                     } else {
-                        showToast("Ce cours est déjà enregistré dans votre espace hors-ligne.", "warning");
+                        showToast("Ce cours est déjà dans votre espace hors-ligne.", "warning");
                     }
                     await renderApp();
                 });
@@ -1410,60 +1905,11 @@
             });
         }
 
-        function renderMediaPlayer(course) {
-            const src = (course.mediaDataUrl || course.mediaUrl || '').trim();
-            if (!src) return '';
-
-            if (course.mediaMime && course.mediaMime.includes('pdf')) {
-                return `
-                    <div class="mt-4 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100">
-                        <div class="bg-slate-900 text-white px-4 py-2 text-xs font-bold flex items-center justify-between">
-                            <span>📄 Document PDF : ${escapeHtml(course.mediaFileName || course.title)}</span>
-                            <span class="text-[#FCD116]">Lecture intégrée protégée</span>
-                        </div>
-                        <iframe src="${src}#toolbar=0" class="w-full h-96" frameborder="0"></iframe>
-                    </div>
-                `;
-            }
-
-            if (course.subSection === 'video' || (course.mediaMime && course.mediaMime.startsWith('video/'))) {
-                const ytMatch = src.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&?]+)/);
-                if (ytMatch) {
-                    return `
-                        <div class="mt-4 aspect-video rounded-2xl overflow-hidden bg-black shadow-inner">
-                            <iframe class="w-full h-full" src="https://www.youtube.com/embed/${ytMatch[1]}?rel=0" frameborder="0" allowfullscreen></iframe>
-                        </div>
-                    `;
-                }
-                return `
-                    <div class="mt-4 rounded-2xl overflow-hidden bg-black">
-                        <video controls controlsList="nodownload" oncontextmenu="return false;" class="w-full max-h-96" src="${escapeHtml(src)}">
-                            Votre navigateur ne supporte pas la lecture vidéo.
-                        </video>
-                    </div>
-                `;
-            }
-
-            if (course.subSection === 'audio' || (course.mediaMime && course.mediaMime.startsWith('audio/'))) {
-                return `
-                    <div class="mt-4 bg-slate-900 text-white p-4 rounded-2xl flex flex-col sm:flex-row items-center gap-3">
-                        <span class="text-2xl">🎧</span>
-                        <div class="w-full">
-                            ${course.mediaFileName ? `<div class="text-xs text-[#FCD116] font-bold mb-1">${escapeHtml(course.mediaFileName)}</div>` : ''}
-                            <audio controls controlsList="nodownload" oncontextmenu="return false;" class="w-full" src="${escapeHtml(src)}">
-                                Votre navigateur ne supporte pas la lecture audio.
-                            </audio>
-                        </div>
-                    </div>
-                `;
-            }
-            return '';
-        }
- // ============================================================================
-        // 7. ESPACE PERSONNEL HORS-LIGNE DE L'ÉTUDIANT
+        // ============================================================================
+        // 7. ESPACE PERSONNEL HORS-LIGNE (CASIER ÉTUDIANT)
         // ============================================================================
         async function renderOfflineLocker(root, user) {
-            const savedCourses = await Store.getUserLocker(user.email);
+            const savedCourses = await MediaDB.getUserLocker(user.email);
 
             root.innerHTML = `
                 <div class="mb-6 bg-white/90 backdrop-blur p-5 rounded-3xl shadow-sm border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1471,7 +1917,7 @@
                         <span class="text-xs font-extrabold uppercase text-[#009E49]">🔒 STOCKAGE INTERNE PERSONNEL & HORS-CONNEXION</span>
                         <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-0.5">Mon Espace Hors-Ligne</h2>
                         <p class="text-xs sm:text-sm text-slate-600 mt-1">
-                            Tous les cours téléchargés ici restent stockés dans votre compte sur le site (non partageables) et accessibles même sans connexion internet.
+                            Tous les cours, PDF, audios et vidéos téléchargés ici restent stockés dans votre casier personnel (non partageables) et accessibles sans connexion internet.
                         </p>
                     </div>
                     <button id="locker-back-btn" type="button"
@@ -1485,11 +1931,11 @@
                         <div class="text-5xl mb-3">📥</div>
                         <h3 class="text-lg font-black text-slate-900">Votre espace hors-ligne est vide</h3>
                         <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto">
-                            Ouvrez une matière et appuyez sur « Télécharger dans mon Espace Hors-Ligne » pour sauvegarder vos résumés, audios et vidéos.
+                            Ouvrez une matière et appuyez sur « Télécharger dans mon espace hors-ligne » pour sauvegarder vos résumés, PDF, audios et vidéos.
                         </p>
                     </div>
                 ` : `
-                    <div class="space-y-5">
+                    <div class="space-y-6">
                         ${savedCourses.map(c => {
                             const subObj = SUB_SECTIONS.find(s => s.id === c.subSection) || { title: c.subSection, icon: '📄' };
                             return `
@@ -1504,8 +1950,8 @@
                                             Retirer de l'espace
                                         </button>
                                     </div>
-                                    ${(c.mediaDataUrl || c.mediaUrl) ? renderMediaPlayer(c) : ''}
-                                    <div class="mt-3 text-sm text-slate-700 whitespace-pre-line bg-slate-50 p-4 rounded-2xl">
+                                    ${buildMediaSlotHTML(c)}
+                                    <div class="mt-4 text-sm text-slate-700 whitespace-pre-line bg-slate-50 p-4 rounded-2xl border border-slate-100">
                                         ${escapeHtml(c.content)}
                                     </div>
                                 </div>
@@ -1514,12 +1960,13 @@
                     </div>
                 `}
             `;
-
             document.getElementById('locker-back-btn').addEventListener('click', () => router.goHome());
+            await hydrateAllMediaSlots(root, savedCourses);
+
             root.querySelectorAll('.remove-locker-btn').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const id = btn.getAttribute('data-remove-locker');
-                    await Store.removeFromUserLocker(user.email, id);
+                    await MediaDB.removeFromUserLocker(user.email, id);
                     showToast("Cours retiré de votre espace hors-ligne.", "warning");
                     await renderApp();
                 });
@@ -1527,18 +1974,17 @@
         }
 
         // ============================================================================
-        // 8. TABLEAU DE BORD ADMINISTRATEUR (ONGLETS RÉACTIFS & 100% FONCTIONNELS)
+        // 8. TABLEAU DE BORD ADMINISTRATEUR
         // ============================================================================
         async function renderAdminDashboard(root) {
             const pendingUsers = Store.getPendingUsers();
             const approvedUsers = Store.getApprovedUsers();
             const analytics = Store.getAnalytics();
             const categories = Store.getCategories();
-            const courses = await Store.getCourses();
+            const courses = Store.getCourses();
             const feedbacks = Store.getFeedbacks();
             const activeTab = router.state.adminTab || 'stats';
 
-            // Calcul des visites par catégorie
             let maxCatVisits = 1;
             let topCatName = 'Aucune visite';
             let topCatCount = -1;
@@ -1560,7 +2006,7 @@
                         <div>
                             <span class="text-xs font-extrabold uppercase tracking-wider text-[#FCD116]">Administration Centrale ZLEV-SCC</span>
                             <h2 class="text-2xl sm:text-3xl font-black mt-1">Tableau de Bord — ZONGO ISMAEL</h2>
-                            <p class="text-xs sm:text-sm text-slate-300 mt-1">Gérez les validations d'accès, publiez vos cours et consultez les critiques des étudiants.</p>
+                            <p class="text-xs sm:text-sm text-slate-300 mt-1">Gérez les validations d'accès, publiez vos cours (PDF, Audio, Vidéo) et consultez les critiques des étudiants.</p>
                         </div>
                         <button id="admin-preview-site-btn" type="button"
                             class="bg-white/15 hover:bg-white/25 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm self-start sm:self-center cursor-pointer">
@@ -1568,7 +2014,7 @@
                         </button>
                     </div>
 
-                    <!-- Navigation par Onglets Clairs -->
+                    <!-- Navigation par Onglets -->
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 bg-white p-2 rounded-2xl shadow-sm border border-slate-200">
                         <button type="button" data-admin-tab="stats"
                             class="admin-tab-btn py-3 px-3 rounded-xl font-extrabold text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer ${activeTab === 'stats' ? 'bg-slate-900 text-[#FCD116] shadow' : 'text-slate-600 hover:bg-slate-100'}">
@@ -1617,7 +2063,6 @@
                             </div>
                         </div>
 
-                        <!-- Graphique en barres des visites par catégorie -->
                         <div class="bg-white rounded-3xl p-6 shadow-md border border-slate-200">
                             <h3 class="text-lg font-black text-slate-900 mb-4">📈 Fréquentation par Catégorie (Classes & Filières)</h3>
                             <div class="space-y-4">
@@ -1642,7 +2087,6 @@
 
                     <!-- ONGLET 2 : VALIDATION DES DEMANDES & GESTION DES MEMBRES -->
                     <div id="tab-panel-users" class="${activeTab === 'users' ? 'grid grid-cols-1 lg:grid-cols-2 gap-6' : 'hidden'}">
-                        <!-- Demandes en attente -->
                         <div class="bg-white rounded-3xl p-6 shadow-md border-2 border-[#FCD116]">
                             <h3 class="text-lg font-black text-slate-900 flex items-center gap-2 mb-4">
                                 <span>⏳</span> Demandes d'entrée en attente (${pendingUsers.length})
@@ -1678,13 +2122,12 @@
                             `}
                         </div>
 
-                        <!-- Membres validés et mémorisés -->
                         <div class="bg-white rounded-3xl p-6 shadow-md border border-slate-200">
                             <h3 class="text-lg font-black text-slate-900 flex items-center gap-2 mb-2">
                                 <span>✅</span> Étudiants validés & mémorisés (${approvedUsers.length})
                             </h3>
                             <p class="text-xs text-slate-500 mb-4">
-                                Le système reconnaît automatiquement leur email et leur code. Si vous cliquez sur « Supprimer l'accès », leur email et code sont effacés immédiatement.
+                                Le système reconnaît automatiquement leur email et leur code. Si vous supprimez l'accès d'un étudiant, son email et son code sont effacés immédiatement.
                             </p>
                             ${approvedUsers.length === 0 ? `
                                 <div class="bg-slate-50 rounded-2xl p-6 text-center text-xs sm:text-sm text-slate-500">
@@ -1711,10 +2154,9 @@
 
                     <!-- ONGLET 3 : AJOUTER & GÉRER LES COURS -->
                     <div id="tab-panel-courses" class="${activeTab === 'courses' ? 'grid grid-cols-1 lg:grid-cols-12 gap-6' : 'hidden'}">
-                        <!-- Formulaire d'ajout de cours -->
                         <div class="lg:col-span-7 bg-white rounded-3xl p-6 shadow-md border border-slate-200">
                             <h3 class="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
-                                <span>➕</span> Publier un Nouveau Cours dans le Site
+                                <span>➕</span> Publier un Nouveau Cours (PDF, Audio, Vidéo, Texte)
                             </h3>
                             <form id="admin-add-course-form" class="space-y-4">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1756,14 +2198,28 @@
                                 </div>
 
                                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-                                    <div class="text-xs font-extrabold text-slate-800">5. Fichier Audio, Vidéo ou PDF (Stocké dans IndexedDB sans limite)</div>
+                                    <div class="text-xs font-extrabold text-slate-800">5. Importer un fichier PDF, Audio ou Vidéo (Stockage IndexedDB haute capacité)</div>
                                     <div>
-                                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Importer un fichier local (MP3, MP4, PDF...)</label>
-                                        <input type="file" id="admin-course-file" accept="audio/*,video/*,application/pdf"
+                                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Choisir un fichier depuis votre téléphone ou ordinateur (PDF, MP3, WAV, OGG, M4A, MP4, WebM, MOV)</label>
+                                        <input type="file" id="admin-course-file" accept=".pdf,application/pdf,audio/*,video/*"
                                             class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-900 file:text-[#FCD116] hover:file:bg-slate-800 cursor-pointer">
                                     </div>
+                                     <!-- Barre de progression d'importation -->
+                                    <div id="admin-upload-progress-wrap" class="hidden">
+                                        <div class="flex justify-between text-[11px] font-bold text-[#009E49] mb-1">
+                                            <span>Enregistrement du fichier binaire dans IndexedDB...</span>
+                                            <span id="admin-upload-pct">0%</span>
+                                        </div>
+                                        <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                                            <div id="admin-upload-bar" class="h-full bg-[#009E49] transition-all duration-200" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Aperçu immédiat avant/après publication -->
+                                    <div id="admin-file-preview-box" class="hidden rounded-2xl border border-emerald-200 bg-white p-3"></div>
+
                                     <div>
-                                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Ou lien Vidéo / Audio externe (URL optionnelle)</label>
+                                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Ou lien Vidéo / Audio / PDF externe (YouTube, Google Drive, URL directe...)</label>
                                         <input type="url" id="admin-course-media" placeholder="https://..."
                                             class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm bg-white outline-none focus:ring-2 focus:ring-[#009E49]">
                                     </div>
@@ -1782,7 +2238,7 @@
                             </form>
                         </div>
 
-                        <!-- Colonne droite : Ajouter une matière + Liste des cours publiés -->
+                        <!-- Colonne droite : Ajouter catégorie/matière + Liste des cours -->
                         <div class="lg:col-span-5 space-y-6">
                             <div class="bg-white rounded-3xl p-6 shadow-md border border-slate-200">
                                 <h3 class="text-base font-black text-slate-900 mb-3">📚 Ajouter une Matière à une Catégorie</h3>
@@ -1800,7 +2256,21 @@
                             </div>
 
                             <div class="bg-white rounded-3xl p-6 shadow-md border border-slate-200">
-                                <h3 class="text-base font-black text-slate-900 mb-3">🗂️ Cours enregistrés dans le site (${courses.length})</h3>
+                                <h3 class="text-base font-black text-slate-900 mb-3">🏫 Ajouter une Nouvelle Catégorie / Classe</h3>
+                                <form id="admin-add-cat-form" class="space-y-3">
+                                    <input type="text" id="admin-newcat-name" required placeholder="Ex: Licence 2 SEG"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                    <input type="text" id="admin-newcat-sub" placeholder="Description courte (optionnel)"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                    <button type="submit"
+                                        class="w-full bg-[#EF2B2D] hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs sm:text-sm transition cursor-pointer">
+                                        + Créer la catégorie
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="bg-white rounded-3xl p-6 shadow-md border border-slate-200">
+                                <h3 class="text-base font-black text-slate-900 mb-3">🗂️ Cours publiés dans le site (${courses.length})</h3>
                                 <div class="space-y-2.5 max-h-96 overflow-y-auto pr-1">
                                     ${courses.length === 0 ? `
                                         <p class="text-xs text-slate-500 text-center py-4">Aucun cours publié.</p>
@@ -1811,6 +2281,7 @@
                                                 <div class="min-w-0">
                                                     <div class="text-[10px] font-extrabold text-[#009E49] uppercase">${escapeHtml(c.subject)} • ${escapeHtml(subLabel)}</div>
                                                     <div class="text-xs font-bold text-slate-900 truncate">${escapeHtml(c.title)}</div>
+                                                    ${c.mediaFileName ? `<div class="text-[10px] text-slate-500 truncate">📎 ${escapeHtml(c.mediaFileName)}</div>` : ''}
                                                 </div>
                                                 <button type="button" data-delete-course="${escapeHtml(c.id)}"
                                                     class="delete-course-btn bg-red-100 hover:bg-[#EF2B2D] text-[#EF2B2D] hover:text-white text-xs font-bold shrink-0 px-3 py-1.5 rounded-xl transition cursor-pointer">
@@ -1853,7 +2324,7 @@
                                                 </div>
                                                 <button type="button" data-delete-fb="${escapeHtml(fb.id)}"
                                                     class="delete-fb-btn bg-emerald-100 hover:bg-[#009E49] text-[#009E49] hover:text-white font-bold px-3 py-1.5 rounded-xl text-xs transition cursor-pointer">
-                                                    ✓ Réglé / Supprimer
+                                                    ✓ Marquer comme réglé
                                                 </button>
                                             </div>
                                         </div>
@@ -1865,34 +2336,27 @@
                 </div>
             `;
 
-            // --- ATTACHEMENT FIABLE DE TOUS LES ÉVÉNEMENTS DU TABLEAU DE BORD ---
+            // --- ATTACHEMENT DES ÉVÉNEMENTS ADMIN ---
             document.getElementById('admin-preview-site-btn').addEventListener('click', () => router.goHome());
 
             root.querySelectorAll('.admin-tab-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    router.openAdmin(btn.getAttribute('data-admin-tab'));
-                });
+                btn.addEventListener('click', () => router.openAdmin(btn.getAttribute('data-admin-tab')));
             });
 
             root.querySelectorAll('[data-jump-tab]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    router.openAdmin(btn.getAttribute('data-jump-tab'));
-                });
+                btn.addEventListener('click', () => router.openAdmin(btn.getAttribute('data-jump-tab')));
             });
-   // Validation d'une demande d'inscription
+
             root.querySelectorAll('.approve-user-btn').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const userId = btn.getAttribute('data-approve-user');
                     if (Store.approveUser(userId)) {
                         showToast("✅ Étudiant validé ! Son email et son code sont mémorisés.");
                         await renderApp();
-                    } else {
-                        showToast("Erreur lors de la validation.", "error");
                     }
                 });
             });
 
-            // Rejet ou suppression d'un utilisateur (efface email + code)
             root.querySelectorAll('.delete-user-btn').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const userId = btn.getAttribute('data-delete-user');
@@ -1902,8 +2366,6 @@
                     }
                 });
             });
-
-            // Suppression d'un cours publié
             root.querySelectorAll('.delete-course-btn').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const courseId = btn.getAttribute('data-delete-course');
@@ -1913,17 +2375,15 @@
                 });
             });
 
-            // Suppression d'une critique réglée
             root.querySelectorAll('.delete-fb-btn').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const fbId = btn.getAttribute('data-delete-fb');
                     Store.deleteFeedback(fbId);
-                    showToast("Note marquée comme réglée et supprimée.");
+                    showToast("Note marquée comme réglée.");
                     await renderApp();
                 });
             });
 
-            // Mise à jour dynamique des matières dans le formulaire d'ajout de cours
             const catSelect = document.getElementById('admin-course-cat');
             const subjSelect = document.getElementById('admin-course-subj');
             const customWrapper = document.getElementById('custom-subject-wrapper');
@@ -1949,7 +2409,33 @@
                 }
             });
 
-            // Soumission du formulaire d'ajout de cours
+            // Aperçu immédiat dès la sélection d'un fichier (PDF.js / Audio / Vidéo)
+            const adminFileInput = document.getElementById('admin-course-file');
+            const adminPreviewBox = document.getElementById('admin-file-preview-box');
+            adminFileInput.addEventListener('change', async () => {
+                const file = adminFileInput.files && adminFileInput.files[0];
+                if (!file) {
+                    adminPreviewBox.classList.add('hidden');
+                    adminPreviewBox.innerHTML = '';
+                    return;
+                }
+                const mime = file.type || MediaDB.inferMimeType(file.name);
+                const previewUrl = ObjectUrlManager.create(file, mime);
+                adminPreviewBox.classList.remove('hidden');
+
+                if (mime.includes('pdf') || file.name.toLowerCase().endsWith('.pdf')) {
+                    const buf = await file.arrayBuffer();
+                    await renderPdfJsViewer(adminPreviewBox, { data: buf }, previewUrl, file.name);
+                } else if (mime.startsWith('audio/') || /\.(mp3|wav|ogg|m4a|aac)$/i.test(file.name)) {
+                    renderAudioPlayer(adminPreviewBox, previewUrl, mime, file.name, null);
+                } else if (mime.startsWith('video/') || /\.(mp4|webm|mov|mkv)$/i.test(file.name)) {
+                    renderVideoPlayer(adminPreviewBox, previewUrl, mime, file.name, null);
+                } else {
+                    adminPreviewBox.innerHTML = `<div class="text-xs font-bold text-[#009E49]">✅ Fichier prêt : ${escapeHtml(file.name)}</div>`;
+                }
+            });
+
+            // Soumission du formulaire de publication de cours
             document.getElementById('admin-add-course-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const btn = document.getElementById('admin-publish-btn');
@@ -1975,62 +2461,105 @@
 
                 try {
                     btn.disabled = true;
-                    btn.textContent = "Enregistrement en cours...";
+                    btn.textContent = "Publication en cours...";
 
-                    let mediaDataUrl = '';
+                    let mediaId = '';
                     let mediaMime = '';
                     let mediaFileName = '';
 
                     if (fileInput && fileInput.files && fileInput.files[0]) {
                         const file = fileInput.files[0];
-                        mediaDataUrl = await readFileAsDataURL(file);
-                        mediaMime = file.type || '';
-                        mediaFileName = file.name || '';
+                        const progressWrap = document.getElementById('admin-upload-progress-wrap');
+                        const progressBar = document.getElementById('admin-upload-bar');
+                        const progressPct = document.getElementById('admin-upload-pct');
+                        progressWrap.classList.remove('hidden');
+
+                        const savedMedia = await MediaDB.saveMediaFile(file, subSection, (pct) => {
+                            progressBar.style.width = pct + '%';
+                            progressPct.textContent = pct + '%';
+                        });
+
+                        mediaId = savedMedia.mediaId;
+                        mediaMime = savedMedia.mimeType;
+                        mediaFileName = savedMedia.fileName;
                     }
 
-                    await Store.addCourse({
+                    const createdCourse = Store.addCourse({
                         categoryId,
                         subject,
                         subSection,
                         title,
                         mediaUrl,
-                        mediaDataUrl,
+                        mediaId,
                         mediaMime,
                         mediaFileName,
                         content
                     });
 
-                    showToast("✅ Cours enregistré et publié avec succès !");
+                    showToast("✅ Cours publié ! Les étudiants peuvent le lire, l'écouter ou le regarder immédiatement.");
+
+                    // Afficher un aperçu immédiat du cours publié dans une modale de confirmation
+                    if (createdCourse.mediaId || createdCourse.mediaUrl) {
+                        openPublishedCoursePreviewModal(createdCourse);
+                    }
                     await renderApp();
                 } catch (err) {
                     console.error(err);
-                    showToast("Erreur lors de la sauvegarde du fichier.", "error");
+                    showToast("Erreur lors de l'enregistrement du fichier.", "error");
                     btn.disabled = false;
                     btn.textContent = "Enregistrer et Publier le Cours ✅";
                 }
             });
 
-            // Soumission du formulaire d'ajout de matière
             document.getElementById('admin-add-subject-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const catId = document.getElementById('admin-newsubj-cat').value;
                 const name = document.getElementById('admin-newsubj-name').value;
                 if (Store.addSubjectToCategory(catId, name)) {
-                    showToast("✅ Nouvelle matière ajoutée avec succès !");
+                    showToast("✅ Nouvelle matière ajoutée !");
                     await renderApp();
                 } else {
                     showToast("Veuillez entrer un nom de matière valide.", "warning");
                 }
             });
+
+            document.getElementById('admin-add-cat-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = document.getElementById('admin-newcat-name').value;
+                const sub = document.getElementById('admin-newcat-sub').value;
+                if (Store.addCategory(name, sub)) {
+                    showToast("✅ Nouvelle catégorie créée !");
+                    await renderApp();
+                }
+            });
         }
 
-        function readFileAsDataURL(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = () => reject(reader.error);
-                reader.readAsDataURL(file);
-            });
+        async function openPublishedCoursePreviewModal(course) {
+            openModal(`
+                <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl border-t-8 border-[#009E49] relative my-8">
+                    <button id="close-pub-preview-btn" type="button"
+                        class="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-700 cursor-pointer">
+                        ✕
+                    </button>
+                    <span class="inline-block px-3 py-1 rounded-full bg-emerald-50 text-[#009E49] text-xs font-extrabold mb-2">
+                        ✅ APERÇU IMMÉDIAT DU COURS PUBLIÉ
+                    </span>
+                    <h3 class="text-lg sm:text-xl font-black text-slate-900">${escapeHtml(course.title)}</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">${escapeHtml(course.subject)}</p>
+                    <div id="pub-preview-media-host">${buildMediaSlotHTML(course)}</div>
+                    <div class="mt-4 text-right">
+                        <button id="ok-pub-preview-btn" type="button"
+                            class="bg-slate-900 text-[#FCD116] font-extrabold px-5 py-2.5 rounded-xl text-xs sm:text-sm cursor-pointer">
+                            Fermer l'aperçu
+                        </button>
+                    </div>
+                </div>
+            `);
+
+            document.getElementById('close-pub-preview-btn').addEventListener('click', closeModal);
+            document.getElementById('ok-pub-preview-btn').addEventListener('click', closeModal);
+            const host = document.getElementById('pub-preview-media-host');
+            await hydrateAllMediaSlots(host, [course]);
         }
 
         // ============================================================================
