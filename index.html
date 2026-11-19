@@ -409,7 +409,7 @@
 
                 // Dupliquer le Blob binaire dans l'entrée du casier pour garantir une disponibilité 100% autonome hors-ligne
                 let offlineBlob = null;
-                let offlneMime = course.mediaMime || '';
+                let offlineMime = course.mediaMime || '';
                 if (course.mediaId) {
                     const mediaRec = await this.getMediaRecord(course.mediaId);
                     if (mediaRec && mediaRec.blob) {
@@ -630,6 +630,7 @@
                     return null;
                 }
             },
+
             setCurrentUser(userObj) {
                 localStorage.setItem(this.KEYS.CURRENT_USER, JSON.stringify(userObj));
             },
@@ -759,7 +760,6 @@
                 localStorage.setItem(this.KEYS.ANALYTICS, JSON.stringify(a));
             }
         };
-
         // ============================================================================
         // MOTEUR DE LECTURE UNIVERSEL (PDF.JS CANVAS HD + AUDIO + VIDÉO + LIENS)
         // ============================================================================
@@ -810,6 +810,7 @@
                     </div>
                 `;
             }
+
             if (parsed.kind === 'pdf_url') {
                 return `
                     <div class="mt-4 media-slot-container" data-course-id="${escapeHtml(course.id)}" data-external-pdf="${escapeHtml(parsed.src)}">
@@ -1131,8 +1132,6 @@
                 await renderPdfJsViewer(slot, { data: arrayBuffer }, blobUrl, fileName);
             } else if (isAudio) {
                 renderAudioPlayer(slot, blobUrl, mimeType, fileName, reloadFn);
-            } else if (isVideo) {
-                renderVideoPlayer(slot, blobUrl, mimeType, fileName, reloadFn);
             } else {
                 slot.innerHTML = `
                     <div class="p-4 rounded-2xl bg-slate-100 border border-slate-300 flex items-center justify-between gap-3">
@@ -1147,7 +1146,8 @@
                 });
             }
         }
-    async function hydrateAllMediaSlots(root, courseList) {
+
+        async function hydrateAllMediaSlots(root, courseList) {
             const slots = root.querySelectorAll('.media-slot-container');
             for (const slot of slots) {
                 const courseId = slot.getAttribute('data-course-id');
@@ -1386,8 +1386,7 @@
                     break;
             }
         }
-
-        // ============================================================================
+          // ============================================================================
         // 1. PORTAIL D'ACCÈS & SERVEUR DE VALIDATION (CONNEXION / INSCRIPTION)
         // ============================================================================
         function renderAuthGate(root) {
@@ -1474,7 +1473,8 @@
                     </div>
                 </div>
             `;
-const tabLoginBtn = document.getElementById('tab-login-btn');
+
+            const tabLoginBtn = document.getElementById('tab-login-btn');
             const tabRegBtn = document.getElementById('tab-register-btn');
             const loginForm = document.getElementById('student-login-form');
             const regForm = document.getElementById('student-register-form');
@@ -1650,9 +1650,8 @@ const tabLoginBtn = document.getElementById('tab-login-btn');
                     router.openCategory(card.getAttribute('data-cat-id'));
                 });
             });
-        }
-
-        // ============================================================================
+            }
+            // ============================================================================
         // 4. NIVEAU 2 : MATIÈRES D'UNE CATÉGORIE
         // ============================================================================
         function renderCategorySubjects(root, categoryId) {
@@ -1705,7 +1704,8 @@ const tabLoginBtn = document.getElementById('tab-login-btn');
                 });
             });
         }
-    // ============================================================================
+
+        // ============================================================================
         // 5. NIVEAU 3 : LES 3 SOUS-ENSEMBLES D'UNE MATIÈRE
         // ============================================================================
         function renderSubjectSubSections(root, categoryId, subjectName) {
@@ -1952,7 +1952,7 @@ const tabLoginBtn = document.getElementById('tab-login-btn');
                             const subObj = SUB_SECTIONS.find(s => s.id === c.subSection) || { title: c.subSection, icon: '📄' };
                             return `
                                 <div class="bg-white rounded-3xl p-6 shadow-md border-l-8 border-[#009E49] protected-content" oncontextmenu="return false;">
-                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
                                         <div>
                                             <span class="text-xs font-extrabold text-[#009E49] uppercase">${escapeHtml(c.subject)} • ${subObj.icon} ${subObj.title}</span>
                                             <h3 class="text-lg font-black text-slate-900 mt-0.5">${escapeHtml(c.title)}</h3>
@@ -1985,6 +1985,7 @@ const tabLoginBtn = document.getElementById('tab-login-btn');
                 });
             });
         }
+
         // ============================================================================
         // 8. TABLEAU DE BORD ADMINISTRATEUR
         // ============================================================================
@@ -2204,7 +2205,7 @@ const tabLoginBtn = document.getElementById('tab-login-btn');
                                     <select id="admin-course-subsec" required
                                         class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm font-semibold bg-white">
                                         ${SUB_SECTIONS.map(s => `<option value="${s.id}">${s.icon} ${s.title}</option>`).join('')}
-                                    </select>
+                         </select>
                                 </div>
 
                                 <div>
@@ -2227,7 +2228,92 @@ const tabLoginBtn = document.getElementById('tab-login-btn');
                                             <span>Enregistrement du fichier binaire dans IndexedDB...</span>
                                             <span id="admin-upload-pct">0%</span>
                                         </div>
-                                                 <!-- ONGLET 4 : NOTES & CRITIQUES DES ÉTUDIANTS -->
+                                        <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                                            <div id="admin-upload-bar" class="h-full bg-[#009E49] transition-all duration-200" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Aperçu immédiat avant/après publication -->
+                                    <div id="admin-file-preview-box" class="hidden rounded-2xl border border-emerald-200 bg-white p-3"></div>
+
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Ou lien Vidéo / Audio / PDF externe (YouTube, Google Drive, URL directe...)</label>
+                                        <input type="url" id="admin-course-media" placeholder="https://..."
+                                            class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm bg-white outline-none focus:ring-2 focus:ring-[#009E49]">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">6. Description / Contenu texte complet du cours</label>
+                                    <textarea id="admin-course-content" rows="5" required placeholder="Saisissez le cours complet, le résumé ou les explications détaillées..."
+                                        class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-[#009E49]"></textarea>
+                                </div>
+
+                                <button type="submit" id="admin-publish-btn"
+                                    class="w-full bg-[#009E49] hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-xl shadow-lg transition text-sm cursor-pointer">
+                                    Enregistrer et Publier le Cours ✅
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Colonne droite : Ajouter catégorie/matière + Liste des cours -->
+                        <div class="lg:col-span-5 space-y-6">
+                            <div class="bg-white rounded-3xl p-6 shadow-md border border-slate-200">
+                                <h3 class="text-base font-black text-slate-900 mb-3">📚 Ajouter une Matière à une Catégorie</h3>
+                                <form id="admin-add-subject-form" class="space-y-3">
+                                    <select id="admin-newsubj-cat" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm font-semibold bg-white">
+                                        ${categories.map(c => `<option value="${c.id}" ${c.id === defaultCat.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
+                                    </select>
+                                    <input type="text" id="admin-newsubj-name" required placeholder="Nom de la matière (ex: FINANCES PUBLIQUES)"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                    <button type="submit"
+                                        class="w-full bg-slate-900 hover:bg-slate-800 text-[#FCD116] font-bold py-2.5 rounded-xl text-xs sm:text-sm transition cursor-pointer">
+                                        + Ajouter la matière
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="bg-white rounded-3xl p-6 shadow-md border border-slate-200">
+                                <h3 class="text-base font-black text-slate-900 mb-3">🏫 Ajouter une Nouvelle Catégorie / Classe</h3>
+                                <form id="admin-add-cat-form" class="space-y-3">
+                                    <input type="text" id="admin-newcat-name" required placeholder="Ex: Licence 2 SEG"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                    <input type="text" id="admin-newcat-sub" placeholder="Description courte (optionnel)"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                    <button type="submit"
+                                        class="w-full bg-[#EF2B2D] hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs sm:text-sm transition cursor-pointer">
+                                        + Créer la catégorie
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="bg-white rounded-3xl p-6 shadow-md border border-slate-200">
+                                <h3 class="text-base font-black text-slate-900 mb-3">🗂️ Cours publiés dans le site (${courses.length})</h3>
+                                <div class="space-y-2.5 max-h-96 overflow-y-auto pr-1">
+                                    ${courses.length === 0 ? `
+                                        <p class="text-xs text-slate-500 text-center py-4">Aucun cours publié.</p>
+                                    ` : courses.map(c => {
+                                        const subLabel = (SUB_SECTIONS.find(s => s.id === c.subSection) || {}).title || c.subSection;
+                                        return `
+                                            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
+                                                <div class="min-w-0">
+                                                    <div class="text-[10px] font-extrabold text-[#009E49] uppercase">${escapeHtml(c.subject)} • ${escapeHtml(subLabel)}</div>
+                                                    <div class="text-xs font-bold text-slate-900 truncate">${escapeHtml(c.title)}</div>
+                                                    ${c.mediaFileName ? `<div class="text-[10px] text-slate-500 truncate">📎 ${escapeHtml(c.mediaFileName)}</div>` : ''}
+                                                </div>
+                                                <button type="button" data-delete-course="${escapeHtml(c.id)}"
+                                                    class="delete-course-btn bg-red-100 hover:bg-[#EF2B2D] text-[#EF2B2D] hover:text-white text-xs font-bold shrink-0 px-3 py-1.5 rounded-xl transition cursor-pointer">
+                                                    Supprimer
+                                                </button>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ONGLET 4 : NOTES & CRITIQUES DES ÉTUDIANTS -->
                     <div id="tab-panel-feedbacks" class="${activeTab === 'feedbacks' ? 'bg-white rounded-3xl p-6 shadow-md border-t-4 border-[#EF2B2D]' : 'hidden'}">
                         <h3 class="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
                             <span>💬</span> Boîte de réception : Notes & Critiques des Étudiants (${feedbacks.length})
@@ -2400,8 +2486,7 @@ const tabLoginBtn = document.getElementById('tab-login-btn');
                     let mediaId = '';
                     let mediaMime = '';
                     let mediaFileName = '';
-
-                    if (fileInput && fileInput.files && fileInput.files[0]) {
+     if (fileInput && fileInput.files && fileInput.files[0]) {
                         const file = fileInput.files[0];
                         const progressWrap = document.getElementById('admin-upload-progress-wrap');
                         const progressBar = document.getElementById('admin-upload-bar');
